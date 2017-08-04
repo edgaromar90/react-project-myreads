@@ -1,5 +1,6 @@
 import React from 'react'
 import * as BooksAPI from './BooksAPI'
+import { Route, Link } from 'react-router-dom'
 import './App.css'
 import BookShelf from './BookShelf'
 import Search from './Search'
@@ -12,40 +13,58 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-    showSearchPage: false,
-    shelfs: [
-            'Currently Reading', //currentlyReading
-            'Want to Read', //wantToRead
-            'Read', //read
-            'None'
-        ],
+      shelfs:[
+            {title: 'Currently Reading', value:'currentlyReading'},
+            {title: 'Want to Read', value:'wantToRead'},
+            {title: 'Read', value:'read'}
+            ],
     books: []
   }
 
-  componentDidMount = () => {
+  updateState = () => {
     BooksAPI.getAll()
     .then((books) => this.setState({books}))
+  }
+
+  componentDidMount = () => {
+    this.updateState();
+  }
+
+  changeShelf = (bookId, shelf) => {
+    console.log("Change "+  +" to shelf "+ shelf)
+    BooksAPI.get(bookId).then(bookToChange =>
+      BooksAPI.update(bookToChange, shelf).then(this.updateState())
+      );
   }
 
   render() {
     return (
       <div className="app">
-        <Search />
+        <Route exact path="/search" render={() =>
+          <Search />
+        } />
+
+        <Route exact path="/" render={() =>
           <div className="list-books">
             <div className="list-books-title">
               <h1>MyReads</h1>
             </div>
             <div className="list-books-content">
               <div>
-                {this.state.shelfs.filter(shelf => shelf !== 'None').map(shelf =>
-                  <BookShelf key={shelf} books={this.state.books} shelfTitle={shelf} shelfOptions={this.state.shelfs}/>
+                {this.state.shelfs.map(shelf =>
+                  <BookShelf key={shelf.value}
+                    books={this.state.books}
+                    thisShelf={shelf}
+                    shelfOptions={this.state.shelfs}
+                    onShelfChange={this.changeShelf}/>
                 )}
               </div>
             </div>
             <div className="open-search">
-              <a onClick={() => this.setState({ showSearchPage: true })}>Add a book</a>
+              <Link to="/search">Add a book</Link>
             </div>
           </div>
+        }/>
       </div>
     )
   }

@@ -2,23 +2,29 @@ import React, { Component } from 'react'
 
 class Book extends Component {
 
+    handleChange = (event) => {
+        this.props.onShelfChange(event.target.name, event.target.value)
+    }
+
     render(){
 
         const { book } = this.props;
+        /* Before the API call cover is '' and after we access the Image */
         const cover = (book !== []) ? book.imageLinks.thumbnail : '';
-
+        //console.log(book);
         return(
             <div className="book">
               <div className="book-top">
                 <div className="book-cover"
                 style={{ width: 128, height: 188, backgroundImage: `url("${cover}")` }}></div>
                 <div className="book-shelf-changer">
-                  <select value={book.shelf.toLowerCase()} onChange={() => {}}>
+                  <select name={book.id} value={book.shelf} onChange={this.handleChange}>
                     <option value="none" disabled>Move to...</option>
-                    {this.props.shelfOptions.map(option =>
-                        <option key={option} value={option.split(' ').join('').toLowerCase()}//Easier to Match with <select value>
-                        >{option}</option>
+                    {this.props.shelfOptions.map(shelf =>
+                        <option key={shelf.value} value={shelf.value}
+                        >{shelf.value}</option>
                     )}
+                    <option value="none">None</option>
                   </select>
                 </div>
               </div>
