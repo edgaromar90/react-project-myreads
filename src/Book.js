@@ -11,7 +11,7 @@ class Book extends Component {
         const { book } = this.props;
         /* Before the API call cover is '' and after we access the Image */
         const cover = (book !== []) ? book.imageLinks.thumbnail : '';
-        //console.log(book);
+
         return(
             <div className="book">
               <div className="book-top">
@@ -19,7 +19,7 @@ class Book extends Component {
                 style={{ width: 128, height: 188, backgroundImage: `url("${cover}")` }}></div>
                 <div className="book-shelf-changer">
                   <select name={book.id} value={book.shelf} onChange={this.handleChange}>
-                    <option value="none" disabled>Move to...</option>
+                    <option value="" disabled>Move to...</option>
                     {this.props.shelfOptions.map(shelf =>
                         <option key={shelf.value} value={shelf.value}
                         >{shelf.value}</option>

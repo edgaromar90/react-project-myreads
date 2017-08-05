@@ -13,17 +13,37 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-      shelfs:[
+      shelfs:[//If later another shelf was needed we could just add it right here
             {title: 'Currently Reading', value:'currentlyReading'},
             {title: 'Want to Read', value:'wantToRead'},
             {title: 'Read', value:'read'}
             ],
-    books: []
+      books: [], //State for the Local Books
+      booksFound: [] //State for the Search Result
   }
 
   updateState = () => {
     BooksAPI.getAll()
-    .then((books) => this.setState({books}))
+    .then(books => this.setState({books}))
+  }
+
+  searchBooks = (query, maxResult=100) => {
+    BooksAPI.search(query, maxResult).then(booksFound =>{
+      booksFound = booksFound.map(bookFound => {
+        for(const localBook of this.state.books){
+          if(bookFound.id === localBook.id){
+            bookFound.shelf = localBook.shelf
+            //If the book from the search is Found we modify it and return it
+            return bookFound
+          }
+        }
+        //If the book is never found is because we don't have it so we set it to none
+        bookFound.shelf = "none"
+        return bookFound
+      })
+      //At the end we Update the State
+      this.setState({booksFound})
+    })
   }
 
   componentDidMount = () => {
@@ -31,7 +51,6 @@ class BooksApp extends React.Component {
   }
 
   changeShelf = (bookId, shelf) => {
-    console.log("Change "+  +" to shelf "+ shelf)
     BooksAPI.get(bookId).then(bookToChange =>
       BooksAPI.update(bookToChange, shelf).then(this.updateState())
       );
@@ -41,7 +60,11 @@ class BooksApp extends React.Component {
     return (
       <div className="app">
         <Route exact path="/search" render={() =>
-          <Search />
+          <Search
+            searchBooks={this.searchBooks}
+            books={this.state.booksFound}
+            shelfOptions={this.state.shelfs}
+            onShelfChange={this.changeShelf}/>
         } />
 
         <Route exact path="/" render={() =>
@@ -70,4 +93,4 @@ class BooksApp extends React.Component {
   }
 }
 
-export default BooksApp
+export default BooksApp;
