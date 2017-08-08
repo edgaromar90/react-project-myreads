@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { Component } from 'react'
 import * as BooksAPI from './BooksAPI'
 import { Route, Link } from 'react-router-dom'
 import './App.css'
 import BookShelf from './BookShelf'
 import Search from './Search'
 
-class BooksApp extends React.Component {
+class BooksApp extends Component {
   state = {
     /**
      * TODO: Instead of using this state variable to keep track of which page
@@ -13,7 +13,7 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-      shelfs:[//If later another shelf was needed we could just add it right here
+      shelves:[//If later another shelf was needed we could just add it right here
             {title: 'Currently Reading', value:'currentlyReading'},
             {title: 'Want to Read', value:'wantToRead'},
             {title: 'Read', value:'read'}
@@ -22,50 +22,58 @@ class BooksApp extends React.Component {
       booksFound: [] //State for the Search Result
   }
 
-  updateState = () => {
-    BooksAPI.getAll()
-    .then(books => this.setState({books}))
+
+  matchLocalShelves = (localBooks, bookFound) => {
+    bookFound.shelf = "none"
+    for(const localBook of localBooks){
+      //If the book from the search is Found we modify it
+      if(bookFound.id === localBook.id){
+        bookFound.shelf = localBook.shelf
+      }
+    }
+    return bookFound
   }
 
   searchBooks = (query, maxResult=100) => {
     BooksAPI.search(query, maxResult).then(booksFound =>{
-      booksFound = booksFound.map(bookFound => {
-        for(const localBook of this.state.books){
-          if(bookFound.id === localBook.id){
-            bookFound.shelf = localBook.shelf
-            //If the book from the search is Found we modify it and return it
-            return bookFound
-          }
-        }
-        //If the book is never found is because we don't have it so we set it to none
-        bookFound.shelf = "none"
-        return bookFound
-      })
-      //At the end we Update the State
+      booksFound = booksFound.map(bookFound =>
+        this.matchLocalShelves(this.state.books, bookFound)
+      )
+      //When we have BooksFound with the appropriate shelves we Update the State
       this.setState({booksFound})
     })
   }
 
   componentDidMount = () => {
-    this.updateState();
+    BooksAPI.getAll()
+    .then(books => this.setState({books}))
   }
 
   changeShelf = (bookId, shelf) => {
-    BooksAPI.get(bookId).then(bookToChange =>
-      BooksAPI.update(bookToChange, shelf).then(this.updateState())
-      );
+    BooksAPI.get(bookId).then(bookToChange => {
+      BooksAPI.update(bookToChange, shelf).then(response => {
+        bookToChange.shelf = shelf
+        this.setState(prevState => (
+          {books: prevState.books.filter(book => book.id !== bookId).concat(bookToChange)}
+          ))
+        }
+      )
+    })
   }
 
   render() {
+
+    const { books, booksFound, shelves } = this.state;
+
     return (
       <div className="app">
         <Route exact path="/search" render={() =>
           <Search
             searchBooks={this.searchBooks}
-            books={this.state.booksFound}
-            shelfOptions={this.state.shelfs}
+            books={booksFound}
+            shelfOptions={shelves}
             onShelfChange={this.changeShelf}/>
-        } />
+        }/>
 
         <Route exact path="/" render={() =>
           <div className="list-books">
@@ -74,11 +82,11 @@ class BooksApp extends React.Component {
             </div>
             <div className="list-books-content">
               <div>
-                {this.state.shelfs.map(shelf =>
+                {shelves.map(shelf =>
                   <BookShelf key={shelf.value}
-                    books={this.state.books}
+                    books={books}
                     thisShelf={shelf}
-                    shelfOptions={this.state.shelfs}
+                    shelfOptions={shelves}
                     onShelfChange={this.changeShelf}/>
                 )}
               </div>

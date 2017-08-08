@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 
 class Book extends Component {
 
-    handleChange = (event) => {
-        this.props.onShelfChange(event.target.name, event.target.value)
+    handleChange = (bookId, shelf) => {
+      this.props.onShelfChange(bookId, shelf)
     }
 
     render(){
 
-        const { book } = this.props;
+        const { book, shelfOptions } = this.props;
         /* Before the API call cover is '' and after we access the Image */
         const cover = (book !== []) ? book.imageLinks.thumbnail : '';
 
@@ -16,13 +16,14 @@ class Book extends Component {
             <div className="book">
               <div className="book-top">
                 <div className="book-cover"
-                style={{ width: 128, height: 188, backgroundImage: `url("${cover}")` }}></div>
+                  style={{ width: 128, height: 188, backgroundImage: `url("${cover}")` }}></div>
                 <div className="book-shelf-changer">
-                  <select name={book.id} value={book.shelf} onChange={this.handleChange}>
+                  <select name={book.id} value={book.shelf} onChange={(e) =>
+                    this.handleChange(e.target.name, e.target.value)}>
+
                     <option value="" disabled>Move to...</option>
-                    {this.props.shelfOptions.map(shelf =>
-                        <option key={shelf.value} value={shelf.value}
-                        >{shelf.value}</option>
+                    {shelfOptions.map(shelf =>
+                        <option key={shelf.value} value={shelf.value}>{shelf.value}</option>
                     )}
                     <option value="none">None</option>
                   </select>
