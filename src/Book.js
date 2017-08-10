@@ -30,9 +30,13 @@ class Book extends Component {
     * an empty string. Once the component is mounted we get Data from
     * the API and we can access one of the Images in book.imageLinks
     */
-    const cover = (book !== []) ? book.imageLinks.thumbnail : '';
+    let cover = '';
+    if (book !== [] && book.imageLinks){
+      cover = book.imageLinks.thumbnail;
+    }
 
     return(
+      (book !== []) &&
       <div className="book">
         <div className="book-top">
           <div className="book-cover" style={{ width: 128, height: 188, backgroundImage: `url("${cover}")` }}></div>
