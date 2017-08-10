@@ -74,7 +74,8 @@ class BooksApp extends Component {
   */
   searchBooks = (query, maxResult=20) => {
     BooksAPI.search(query, maxResult).then(booksFound => {
-      this.updateBooksFound(booksFound)
+      //If the API returns an error the update function never gets called
+      booksFound.error || this.updateBooksFound(booksFound)
     })
   }
 
@@ -128,17 +129,15 @@ class BooksApp extends Component {
             <div className="list-books-content">
               <div>
                 {/**
-                * Filter the books that doesn't belong to this shelf. After
-                * that we're left with the correct list of books, we map
-                * over that list and create a new Book Component for each one
-                * of them. Passing:
-                *** books - the array of books it self
+                * Mapping over the array of shelves we create a new BookShelf
+                * for each one of them. Passing:
+                *** books - the array of books (already filtered by shelf)
                 *** shelfOptions - the options for changing the shelves
                 *** onShelfChange - Function to change between Shelves
                 */}
                 {this.shelves.map(shelf =>
                   <BookShelf key={shelf.value}
-                    books={books}
+                    books={books.filter(book => book.shelf === shelf.value)}
                     thisShelf={shelf}
                     shelfOptions={this.shelves}
                     onShelfChange={this.changeShelf}/>

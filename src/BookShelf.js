@@ -17,16 +17,13 @@ function BookShelf(props){
       <div className="bookshelf-books">
         <ol className="books-grid">
           {/**
-          * Filter the books that doesn't belong to this shelf. After
-          * that we're left with the correct list of books, we map
-          * over that list and create a new Book Component for each one
-          * of them. Passing:
+          * We map over the array of books and create a new Book
+          * Component for each one of them. Passing:
           *** book - the book it self
           *** shelfOptions - the options for changing the shelves
           *** onShelfChange - Function to change between Shelves
           */}
-          {(books) && (books.filter(book =>
-            book.shelf === thisShelf.value).map(book =>
+          {(books) && (books.map(book =>
               <li key={book.id}>
                 <Book
                   book={book}
