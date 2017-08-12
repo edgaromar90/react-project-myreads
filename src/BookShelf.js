@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 * @description Stateless Functional Component that represent every Shelf.
 * @param {object} props - the object passed from the Parent component.
 */
-function BookShelf(props){
+const BookShelf = (props) => {
 
   //Destructuring the props object
   const { books, thisShelf, shelfOptions, onShelfChange } = props;
